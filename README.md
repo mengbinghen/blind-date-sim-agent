@@ -9,6 +9,10 @@
 </p>
 
 <p align="center">
+  LLM 产品原型 · 多角色对话编排 · SSE 流式进度展示
+</p>
+
+<p align="center">
   <img alt="Python" src="https://img.shields.io/badge/Python-3.8%2B-3776AB?style=flat-square&logo=python&logoColor=white">
   <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-0.109-009688?style=flat-square&logo=fastapi&logoColor=white">
   <img alt="Frontend" src="https://img.shields.io/badge/Frontend-HTML%2FCSS%2FVanilla%20JS-FF6B81?style=flat-square">
@@ -41,7 +45,6 @@
 
 当前 README 已按下面的相对路径预留展示位：
 
-- `docs/images/home.png`
 - `docs/images/candidates.jpg`
 - `docs/images/home.jpg`
 - `docs/images/simulation.jpg`
