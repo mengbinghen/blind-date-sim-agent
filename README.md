@@ -42,26 +42,27 @@
 当前 README 已按下面的相对路径预留展示位：
 
 - `docs/images/home.png`
-- `docs/images/candidates.png`
-- `docs/images/simulation.png`
+- `docs/images/candidates.jpg`
+- `docs/images/home.jpg`
+- `docs/images/simulation.jpg`
 
 ### 首页
 
 用户资料录入、模拟参数调节、实时摘要和随机画像入口都集中在这个页面，比较适合作为项目封面图。
 
-![首页预览](docs/images/home.png)
+![首页预览](docs/images/home.jpg)
 
 ### 候选人生成页
 
 AI 会根据用户资料生成多位候选人，用户可以先浏览候选人卡片，再进入批量模拟流程。
 
-![候选人页](docs/images/candidates.png)
+![候选人页](docs/images/candidates.jpg)
 
 ### 对话模拟页
 
 左侧展示候选人进度，右侧实时展示当前对话内容，比较能体现这个项目的 SSE 流式交互体验。
 
-![模拟页](docs/images/simulation.png)
+![模拟页](docs/images/simulation.jpg)
 
 ## 核心能力
 
