@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI相亲模拟 - 对话模拟</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="simulation-page">
+    <div class="simulation-container">
+        <!-- 左侧候选人列表 -->
+        <div class="candidate-sidebar">
+            <div class="sidebar-header">
+                <h3>候选人</h3>
+                <div class="overall-progress">
+                    <span id="overallProgressText">0/0 轮</span>
+                </div>
+            </div>
+            <div id="candidateList" class="candidate-list">
+                <!-- 候选人标签将通过JS动态生成 -->
+            </div>
+        </div>
+
+        <!-- 右侧对话展示区域 -->
+        <div class="main-content">
+            <!-- 对话头部 -->
+            <div class="conversation-header">
+                <div class="current-candidate-info">
+                    <span id="currentCandidateAvatar" class="candidate-avatar">👩</span>
+                    <div>
+                        <h3 id="currentCandidateName">候选人姓名</h3>
+                        <p id="currentCandidateDetails">26岁 · 产品经理</p>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <span id="roundIndicator" class="round-indicator">第 0/20 轮</span>
+                    <a href="/" class="btn btn-secondary btn-outline">返回主界面</a>
+                    <button id="viewRecommendationBtn" class="btn btn-secondary" disabled>查看推荐</button>
+                </div>
+            </div>
+
+            <!-- 对话消息区域 -->
+            <div id="conversationMessages" class="conversation-messages">
+                <div class="empty-state">
+                    <p>正在加载对话...</p>
+                </div>
+            </div>
+
+            <!-- 模拟状态指示 -->
+            <div id="simulationStatus" class="simulation-status">
+                <div class="status-content">
+                    <div class="status-spinner"></div>
+                    <p id="statusText">AI正在模拟对话中...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="js/api.js?v=1.1"></script>
+    <script src="js/simulation.js?v=1.6"></script>
+</body>
+</html>

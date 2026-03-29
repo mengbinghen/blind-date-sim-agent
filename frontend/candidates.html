@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI相亲模拟 - 候选人展示</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="candidates-page">
+    <div class="candidates-container">
+        <!-- 页面头部 -->
+        <div class="candidates-header">
+            <h1>💘 您的相亲候选人</h1>
+            <p class="subtitle">AI已根据您的资料生成 <span id="candidateCount">10</span> 位匹配对象</p>
+        </div>
+
+        <!-- 加载状态 -->
+        <div id="loadingState" class="loading-container" style="display: none;">
+            <div class="loading-spinner"></div>
+            <p>正在生成候选人...</p>
+        </div>
+
+        <!-- 候选人网格 -->
+        <div id="candidatesGrid" class="candidates-grid">
+            <!-- 候选人卡片将通过JS动态生成 -->
+        </div>
+
+        <!-- 底部操作栏 -->
+        <div class="candidates-footer">
+            <div class="footer-tips">
+                <span class="tip-icon">💡</span>
+                <span class="tip-text">AI将模拟您与每位候选人的对话，完成后为您推荐最佳匹配</span>
+            </div>
+            <div class="footer-actions">
+                <a href="/" class="btn btn-secondary btn-outline">返回重新设置</a>
+                <button id="startSimulationBtn" class="btn btn-primary btn-large" disabled>
+                    <span class="btn-text">开始AI模拟对话</span>
+                    <span class="btn-loading" style="display: none;">模拟中...</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="js/api.js?v=1.1"></script>
+    <script src="js/candidates.js?v=1.6"></script>
+</body>
+</html>

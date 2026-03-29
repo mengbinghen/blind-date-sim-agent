@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI相亲模拟 - 最佳匹配推荐</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="recommendation-page">
+    <div class="container">
+        <div class="header">
+            <h1>🏆 最佳匹配推荐</h1>
+            <p class="subtitle">AI已分析所有对话，为您找到最匹配的相亲对象</p>
+        </div>
+
+        <!-- 加载状态 -->
+        <div id="loadingState" class="loading-container">
+            <div class="loading-spinner"></div>
+            <p>AI正在分析对话...</p>
+        </div>
+
+        <!-- 推荐结果内容 -->
+        <div id="recommendationContent" class="recommendation-content" style="display: none;">
+            <!-- 最佳匹配卡片 -->
+            <div class="best-match-card">
+                <div class="match-header">
+                    <span class="trophy-icon">🏆</span>
+                    <h2>最佳匹配</h2>
+                </div>
+                <div class="match-profile">
+                    <div id="bestMatchAvatar" class="match-avatar">👩</div>
+                    <div class="match-info">
+                        <h3 id="bestMatchName">候选人姓名</h3>
+                        <p id="bestMatchDetails">26岁 · 产品经理</p>
+                        <p id="bestMatchInterests" class="interests">瑜伽、阅读、旅行</p>
+                    </div>
+                </div>
+                <div class="match-score">
+                    <div id="compatibilityScore" class="score-circle">85</div>
+                    <p class="score-label">兼容性评分</p>
+                </div>
+                <div class="match-reasoning">
+                    <h4>推荐理由</h4>
+                    <ul id="reasoningList" class="reason-list">
+                        <!-- 推荐理由将通过JS动态生成 -->
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 对话高光时刻 -->
+            <div class="highlights-section card">
+                <div class="card-header">
+                    <h3>💬 对话高光时刻</h3>
+                </div>
+                <div id="conversationHighlights" class="highlights-list">
+                    <!-- 高光时刻将通过JS动态生成 -->
+                </div>
+            </div>
+
+            <!-- 成长空间 -->
+            <div class="growth-section card">
+                <div class="card-header">
+                    <h3>🌱 潜在成长空间</h3>
+                </div>
+                <ul id="growthAreas" class="growth-list">
+                    <!-- 成长空间将通过JS动态生成 -->
+                </ul>
+            </div>
+
+            <!-- 所有候选人排名 -->
+            <div class="rankings-section card">
+                <div class="card-header">
+                    <h3>📊 所有候选人排名</h3>
+                </div>
+                <div id="allRankings" class="rankings-table">
+                    <!-- 排名表格将通过JS动态生成 -->
+                </div>
+            </div>
+
+            <!-- 操作按钮 -->
+            <div class="result-actions">
+                <a href="/" class="btn btn-primary btn-large">返回主界面</a>
+                <button id="viewAllConversationsBtn" class="btn btn-secondary btn-outline">查看所有对话</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="js/api.js?v=1.1"></script>
+    <script src="js/recommendation.js?v=1.1"></script>
+</body>
+</html>

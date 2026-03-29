@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI相亲模拟 - 个人资料设置</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="profile-page">
+    <div class="profile-container">
+        <!-- 左侧：表单区域 -->
+        <div class="main-content">
+            <div class="page-header">
+                <h1>💕 AI相亲模拟</h1>
+                <p class="subtitle">快速生成候选人，批量模拟对话，帮你更高效找到最佳匹配</p>
+            </div>
+
+            <form id="profileForm" class="profile-form">
+                <!-- 基本信息：三列 -->
+                <div class="form-section">
+                    <div class="form-row form-row-3">
+                        <div class="form-group">
+                            <label for="gender">性别 <span class="required">*</span></label>
+                            <select id="gender" name="gender" required>
+                                <option value="">请选择</option>
+                                <option value="male">男</option>
+                                <option value="female">女</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="birth_year">出生年份 <span class="required">*</span></label>
+                            <input type="number" id="birth_year" name="birth_year" min="1940" max="2010" required
+                                   placeholder="如：1995">
+                        </div>
+                        <div class="form-group">
+                            <label for="birth_month">出生月份 <span class="required">*</span></label>
+                            <select id="birth_month" name="birth_month" required>
+                                <option value="">请选择</option>
+                                <option value="1">1月</option>
+                                <option value="2">2月</option>
+                                <option value="3">3月</option>
+                                <option value="4">4月</option>
+                                <option value="5">5月</option>
+                                <option value="6">6月</option>
+                                <option value="7">7月</option>
+                                <option value="8">8月</option>
+                                <option value="9">9月</option>
+                                <option value="10">10月</option>
+                                <option value="11">11月</option>
+                                <option value="12">12月</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- 年龄显示 -->
+                    <div class="age-display">
+                        <span class="age-label">您的年龄：</span>
+                        <span class="age-value" id="calculatedAge">--</span>
+                        <span class="age-unit">岁</span>
+                    </div>
+
+                    <!-- 所在城市 -->
+                    <div class="form-row">
+                        <div class="form-group" style="flex: 0 0 auto; min-width: 200px;">
+                            <label for="city">所在城市 <span class="required">*</span></label>
+                            <input type="text" id="city" name="city" required
+                                   placeholder="如：北京、上海、深圳" list="majorCities">
+                            <datalist id="majorCities">
+                                <option value="北京">
+                                <option value="上海">
+                                <option value="深圳">
+                                <option value="广州">
+                                <option value="杭州">
+                                <option value="成都">
+                                <option value="南京">
+                                <option value="武汉">
+                                <option value="西安">
+                                <option value="重庆">
+                                <option value="天津">
+                                <option value="苏州">
+                                <option value="长沙">
+                                <option value="郑州">
+                                <option value="青岛">
+                                <option value="大连">
+                            </datalist>
+                        </div>
+                    </div>
+
+                    <!-- 职业、学历、兴趣：三列 -->
+                    <div class="form-row form-row-3">
+                        <div class="form-group">
+                            <label for="education">学历 <span class="required">*</span></label>
+                            <select id="education" name="education" required>
+                                <option value="">请选择</option>
+                                <option value="高中">高中</option>
+                                <option value="大专">大专</option>
+                                <option value="本科">本科</option>
+                                <option value="硕士">硕士</option>
+                                <option value="博士">博士</option>
+                                <option value="其他">其他</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="occupation">职业 <span class="required">*</span></label>
+                            <input type="text" id="occupation" name="occupation" required
+                                   placeholder="如：软件工程师">
+                        </div>
+                        <div class="form-group">
+                            <label for="interests">兴趣爱好 <span class="required">*</span></label>
+                            <input type="text" id="interests" name="interests" required
+                                   placeholder="如：阅读、旅行">
+                        </div>
+                    </div>
+
+                    <!-- 自我描述、理想型：两列 -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="self_description">自我描述 <span class="optional">(可选)</span></label>
+                            <textarea id="self_description" name="self_description" rows="2"
+                                      placeholder="简单介绍自己的性格、特点..." maxlength="500"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="ideal_type">理想型描述 <span class="optional">(可选)</span></label>
+                            <textarea id="ideal_type" name="ideal_type" rows="2"
+                                      placeholder="描述您希望遇到的另一半..." maxlength="500"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-large" id="submitBtn">
+                        <span class="btn-text">生成候选人</span>
+                        <span class="btn-loading" style="display: none;">正在生成...</span>
+                    </button>
+                    <p class="form-action-hint">提交后会先生成候选人，再自动进入模拟流程</p>
+                </div>
+            </form>
+        </div>
+
+        <!-- 右侧：配置和快捷操作 -->
+        <aside class="sidebar">
+            <div class="sidebar-card">
+                <div class="sidebar-card-header">
+                    <span class="sidebar-icon">⚙️</span>
+                    <h3>模拟参数</h3>
+                </div>
+
+                <div class="config-item">
+                    <label for="candidateCount">候选人数: <strong id="candidateCountValue">10</strong></label>
+                    <input type="range" id="candidateCount" name="candidate_count" min="1" max="20" value="10" class="config-slider">
+                    <div class="slider-labels">
+                        <span>1</span>
+                        <span>20</span>
+                    </div>
+                    <p class="config-help">支持从单人精聊到多人批量对比，人数越多模拟耗时越长。</p>
+                </div>
+
+                <div class="config-item">
+                    <label for="maxRounds">对话轮数: <strong id="maxRoundsValue">20</strong></label>
+                    <input type="range" id="maxRounds" name="max_rounds" min="10" max="50" value="20" class="config-slider">
+                    <div class="slider-labels">
+                        <span>10</span>
+                        <span>50</span>
+                    </div>
+                    <p class="config-help">轮数越高，对话更完整，也会带来更长的等待时间。</p>
+                </div>
+
+                <div class="simulation-summary" id="simulationSummary">
+                    <div class="summary-header">
+                        <span>本次模拟摘要</span>
+                        <strong id="summaryBadge">标准模式</strong>
+                    </div>
+                    <div class="summary-grid">
+                        <div class="summary-item">
+                            <span class="summary-label">候选人</span>
+                            <strong id="summaryCandidates">10 人</strong>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">每人轮数</span>
+                            <strong id="summaryRounds">20 轮</strong>
+                        </div>
+                        <div class="summary-item summary-item-wide">
+                            <span class="summary-label">预计总轮次</span>
+                            <strong id="summaryTotalRounds">200 轮</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-card">
+                <div class="sidebar-card-header">
+                    <span class="sidebar-icon">🎲</span>
+                    <h3>快速体验</h3>
+                </div>
+                <button type="button" class="btn btn-secondary btn-outline" id="randomProfileBtn" style="width: 100%;">
+                    随机生成用户画像
+                </button>
+                <p class="sidebar-hint">快速体验，随机生成一个虚拟用户资料</p>
+            </div>
+        </aside>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="js/api.js?v=1.1"></script>
+    <script src="js/profile.js?v=1.3"></script>
+</body>
+</html>
