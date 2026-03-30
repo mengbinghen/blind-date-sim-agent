@@ -132,6 +132,77 @@ body.profile-page {
     color: var(--primary-color);
 }
 
+.config-select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: white;
+    font-size: 0.95rem;
+}
+
+.feature-toggle-item {
+    padding: 12px;
+    border: 1px solid rgba(255, 107, 129, 0.16);
+    border-radius: var(--radius-md);
+    background: rgba(255, 107, 129, 0.06);
+}
+
+.toggle-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.toggle-row .config-help {
+    margin-top: 4px;
+}
+
+.switch {
+    position: relative;
+    display: inline-flex;
+    width: 52px;
+    height: 30px;
+    flex-shrink: 0;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.switch-slider {
+    position: absolute;
+    inset: 0;
+    background: #cfd6de;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.switch-slider::before {
+    content: "";
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    left: 4px;
+    top: 4px;
+    border-radius: 50%;
+    background: white;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+}
+
+.switch input:checked + .switch-slider {
+    background: var(--primary-color);
+}
+
+.switch input:checked + .switch-slider::before {
+    transform: translateX(22px);
+}
+
 .config-help {
     margin-top: 8px;
     font-size: 0.8rem;
@@ -405,6 +476,26 @@ body.profile-page {
 
 .form-actions {
     margin-top: 18px;
+}
+
+.form-actions-main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.quick-experience-inline {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-left: 12px;
+    border-left: 1px solid var(--border-color);
+}
+
+.quick-experience-icon {
+    font-size: 1rem;
 }
 
 .form-action-hint {
@@ -1424,6 +1515,22 @@ body.profile-page {
         outline: 3px solid #ff6b81;
         outline-offset: -3px;
     }
+
+    .form-actions-main {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .quick-experience-inline {
+        border-left: none;
+        padding-left: 0;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .form-actions-main .btn {
+        width: 100%;
+    }
 }
 
 @media (min-width: 481px) and (max-width: 768px) {
@@ -1594,6 +1701,16 @@ body.candidates-page {
 .candidates-header .subtitle #candidateCount {
     font-weight: bold;
     font-size: 1.1rem;
+}
+
+.candidates-scenario-summary {
+    display: inline-flex;
+    margin-top: 12px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    font-size: 0.82rem;
 }
 
 .candidates-grid {
@@ -1828,6 +1945,33 @@ body.candidates-page {
     background: #f0f2f5;
 }
 
+.scenario-banner {
+    padding: 12px 20px;
+    background: #fff7fb;
+    border-bottom: 1px solid rgba(255, 107, 129, 0.16);
+}
+
+.scenario-banner-main {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-primary);
+}
+
+.scenario-banner-label {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+}
+
+.event-card-banner {
+    margin-top: 8px;
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    background: rgba(255, 107, 129, 0.1);
+    color: var(--primary-hover);
+    font-size: 0.86rem;
+}
+
 .simulation-status {
     padding: 20px;
     text-align: center;
@@ -1889,6 +2033,16 @@ body.candidates-page {
 
 .match-score {
     margin: 20px 0;
+}
+
+.match-ending {
+    margin-bottom: 20px;
+}
+
+.ending-reason {
+    margin-top: 10px;
+    opacity: 0.92;
+    font-size: 0.92rem;
 }
 
 .score-circle {
@@ -2049,6 +2203,517 @@ body.candidates-page {
     background: #ff6348;
 }
 
+.ending-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: white;
+    background: #ffa502;
+}
+
+.ending-badge.excellent {
+    background: #2ed573;
+}
+
+.ending-badge.good {
+    background: #3742fa;
+}
+
+.ending-badge.average {
+    background: #ffa502;
+}
+
+.ending-badge.poor {
+    background: #ff6348;
+}
+
+/* ==================== 推荐页面样式（标签页布局） ==================== */
+body.recommendation-page {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.recommendation-container {
+    background: var(--card-bg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    max-width: 1100px;
+    width: 100%;
+    overflow: hidden;
+}
+
+.rec-header {
+    padding: 20px 50px 20px 20px;
+    background: linear-gradient(135deg, #ff6b81 0%, #ff4757 100%);
+    color: white;
+    text-align: center;
+    position: relative;
+}
+
+.rec-back-btn {
+    position: absolute;
+    top: 50%;
+    right: 20px;
+    transform: translateY(-50%);
+    padding: 10px 20px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 20px;
+    color: white;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.rec-back-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-50%) scale(1.05);
+}
+
+.rec-header .subtitle {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.recommendation-content {
+    padding: 0;
+}
+
+/* 标签导航 */
+.rec-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border-color);
+    background: #f8f9fa;
+}
+
+.rec-tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 16px 12px;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    transition: var(--transition);
+    color: var(--text-secondary);
+}
+
+.rec-tab:hover {
+    background: rgba(255, 107, 129, 0.08);
+    color: var(--primary-color);
+}
+
+.rec-tab.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+    background: white;
+}
+
+.rec-tab .tab-icon {
+    font-size: 1.5rem;
+}
+
+.rec-tab .tab-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+/* 标签内容区域 */
+.rec-tab-content {
+    padding: 20px 24px;
+    min-height: 380px;
+}
+
+.rec-tab-panel {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.rec-tab-panel.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 面板标题 */
+.panel-title {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.panel-title h3 {
+    font-size: 1.2rem;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+}
+
+.panel-title .panel-subtitle {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+/* 最佳匹配卡片 - 横向紧凑布局 */
+.best-match-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: var(--radius-lg);
+    color: white;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    /* 占视口高度的约70%（减去头部和标签栏的高度） */
+    height: calc(70vh - 140px);
+    min-height: 250px;
+    max-height: 450px;
+}
+
+.match-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
+}
+
+.trophy-icon {
+    font-size: 1.4rem;
+}
+
+.match-header h2 {
+    font-size: 1rem;
+    margin: 0;
+}
+
+.match-body {
+    display: grid;
+    grid-template-columns: 200px 180px 1fr;
+    gap: 0;
+    flex: 1;
+    /* 允许内容溢出时滚动 */
+    overflow-y: auto;
+}
+
+.match-profile {
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border-right: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.match-avatar {
+    font-size: 3.2rem;
+    margin-bottom: 10px;
+}
+
+.match-info h3 {
+    font-size: 1.1rem;
+    margin: 0 0 5px 0;
+}
+
+.match-info p {
+    opacity: 0.9;
+    margin: 3px 0;
+    font-size: 0.85rem;
+}
+
+.match-info .interests {
+    opacity: 0.8;
+    font-style: italic;
+    font-size: 0.8rem;
+}
+
+.match-metrics {
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-right: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.match-score-inline {
+    text-align: center;
+    margin-bottom: 14px;
+}
+
+.match-score-inline .score-number {
+    font-size: 2.8rem;
+    font-weight: 700;
+    display: block;
+    line-height: 1;
+}
+
+.match-score-inline .score-label {
+    font-size: 0.8rem;
+    opacity: 0.85;
+}
+
+.match-ending {
+    text-align: center;
+}
+
+.ending-badge {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 16px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.25);
+    color: white;
+}
+
+.ending-badge.excellent {
+    background: rgba(46, 213, 115, 0.9);
+}
+
+.ending-badge.good {
+    background: rgba(55, 66, 250, 0.9);
+}
+
+.ending-badge.average {
+    background: rgba(255, 165, 2, 0.9);
+}
+
+.ending-badge.poor {
+    background: rgba(255, 99, 72, 0.9);
+}
+
+.ending-reason {
+    margin-top: 8px;
+    opacity: 0.9;
+    font-size: 0.8rem;
+}
+
+.match-reasoning {
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.match-reasoning h4 {
+    font-size: 0.95rem;
+    margin-bottom: 12px;
+    opacity: 0.95;
+}
+
+.reason-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 12px;
+}
+
+.reason-list li {
+    padding: 6px 0 6px 18px;
+    position: relative;
+    font-size: 0.88rem;
+    line-height: 1.35;
+}
+
+.reason-list li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #2ed573;
+    font-weight: bold;
+    font-size: 0.75rem;
+}
+
+/* 对话高光 - 独立面板 */
+.highlights-section {
+    max-width: 100%;
+}
+
+.highlights-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 14px;
+}
+
+.highlight-item {
+    padding: 14px 16px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    transition: var(--transition);
+}
+
+.highlight-item:hover {
+    box-shadow: var(--shadow-sm);
+    transform: translateY(-1px);
+}
+
+.highlight-round {
+    font-size: 0.75rem;
+    color: var(--primary-color);
+    font-weight: 600;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.highlight-exchange {
+    font-weight: 500;
+    margin: 6px 0;
+    font-size: 0.92rem;
+    line-height: 1.4;
+    color: var(--text-primary);
+}
+
+.highlight-why {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-style: italic;
+    padding-left: 12px;
+    border-left: 2px solid var(--primary-color);
+}
+
+/* 成长空间 - 独立面板 */
+.growth-section {
+    max-width: 100%;
+}
+
+.growth-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 12px;
+}
+
+.growth-list li {
+    padding: 14px 18px;
+    padding-left: 44px;
+    position: relative;
+    font-size: 0.92rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    line-height: 1.5;
+}
+
+.growth-list li::before {
+    content: "🌱";
+    position: absolute;
+    left: 14px;
+    font-size: 1.2rem;
+}
+
+/* 排名表格 - 独立面板 */
+.rankings-section {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.rankings-table-compact {
+    background: white;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+}
+
+.rankings-table-compact table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.rankings-table-compact th,
+.rankings-table-compact td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.rankings-table-compact th {
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: #f8f9fa;
+    position: sticky;
+    top: 0;
+}
+
+.rankings-table-compact .best-match-row {
+    background: #fff3e0;
+}
+
+.rankings-table-compact .rank-cell {
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.rankings-table-compact .score-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    color: white;
+}
+
+.rankings-table-compact .score-badge.excellent { background: #2ed573; }
+.rankings-table-compact .score-badge.good { background: #3742fa; }
+.rankings-table-compact .score-badge.average { background: #ffa502; }
+.rankings-table-compact .score-badge.poor { background: #ff6348; }
+
+.rankings-table-compact .candidate-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.rankings-table-compact .candidate-cell .avatar {
+    font-size: 1.1rem;
+}
+
+.rankings-table-compact .candidate-cell .name {
+    font-weight: 500;
+}
+
+.rankings-table-compact .brief-cell {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    max-width: 150px;
+}
+
+/* 空状态提示 */
+.empty-state {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 40px 20px;
+    font-size: 0.95rem;
+}
+
 /* 响应式调整 */
 @media (max-width: 768px) {
     .simulation-container {
@@ -2075,5 +2740,171 @@ body.candidates-page {
     .ranking-table th,
     .ranking-table td {
         padding: 8px 4px;
+    }
+
+    /* 推荐页面移动端 */
+    body.recommendation-page {
+        padding: 10px;
+    }
+
+    .rec-header {
+        padding: 16px 16px 16px 16px;
+    }
+
+    .rec-back-btn {
+        position: static;
+        transform: none;
+        display: block;
+        margin: 12px auto 0;
+        text-align: center;
+    }
+
+    .rec-back-btn:hover {
+        transform: scale(1.05);
+    }
+
+    .rec-header h1 {
+        font-size: 1.2rem;
+    }
+
+    .rec-tab-content {
+        padding: 16px;
+        min-height: 350px;
+    }
+
+    .rec-tab .tab-icon {
+        font-size: 1.2rem;
+    }
+
+    .rec-tab .tab-label {
+        font-size: 0.75rem;
+    }
+
+    .rec-tab {
+        padding: 12px 8px;
+    }
+
+    .best-match-card {
+        height: auto;
+        min-height: auto;
+        max-height: none;
+    }
+
+    .best-match-card .match-header {
+        padding: 10px 12px;
+    }
+
+    .match-header h2 {
+        font-size: 0.95rem;
+    }
+
+    .match-body {
+        grid-template-columns: 1fr;
+        overflow-y: visible;
+    }
+
+    .match-profile {
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+        padding: 14px;
+    }
+
+    .match-avatar {
+        font-size: 2.8rem;
+    }
+
+    .match-metrics {
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+        flex-direction: row;
+        gap: 16px;
+        padding: 16px;
+    }
+
+    .match-score-inline .score-number {
+        font-size: 2.2rem;
+    }
+
+    .match-reasoning {
+        padding: 16px;
+    }
+
+    .reason-list {
+        grid-template-columns: 1fr;
+    }
+
+    .rankings-table-compact th,
+    .rankings-table-compact td {
+        padding: 8px 6px;
+        font-size: 0.8rem;
+    }
+
+    .highlight-item {
+        padding: 12px;
+    }
+
+    .highlights-list {
+        grid-template-columns: 1fr;
+    }
+
+    .highlight-exchange {
+        font-size: 0.9rem;
+    }
+
+    .growth-list {
+        grid-template-columns: 1fr;
+    }
+
+    .growth-list li {
+        padding: 12px 14px;
+        padding-left: 40px;
+        font-size: 0.88rem;
+    }
+
+    .growth-list li::before {
+        font-size: 1.1rem;
+        left: 12px;
+    }
+
+    .rankings-table-compact .brief-cell {
+        max-width: 80px;
+        font-size: 0.75rem;
+    }
+}
+
+/* 平板尺寸适配 */
+@media (max-width: 900px) {
+    .best-match-card {
+        height: auto;
+        min-height: auto;
+        max-height: none;
+    }
+
+    .match-body {
+        grid-template-columns: 1fr;
+        overflow-y: visible;
+    }
+
+    .match-profile {
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .match-metrics {
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+        flex-direction: row;
+    }
+
+    .reason-list {
+        grid-template-columns: 1fr;
+    }
+
+    .highlights-list {
+        grid-template-columns: 1fr;
+    }
+
+    .growth-list {
+        grid-template-columns: 1fr;
     }
 }

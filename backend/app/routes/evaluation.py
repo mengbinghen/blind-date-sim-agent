@@ -220,7 +220,8 @@ async def get_recommendation(session_id: str):
         # 生成新的推荐结果
         recommendation_data = await agent_service.generate_comparative_recommendation(
             user_profile=session.user_profile,
-            candidates=session.candidates
+            candidates=session.candidates,
+            scenario_mode=session.scenario_mode
         )
 
         if not recommendation_data:

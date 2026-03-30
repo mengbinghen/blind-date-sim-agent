@@ -63,6 +63,21 @@ const RANDOM_DATA_POOLS = {
     ]
 };
 
+const SCENARIO_OPTIONS = {
+    first_chat: {
+        label: '初识聊天',
+        help: '从第一印象聊到共同兴趣，再自然试探是否愿意继续接触。'
+    },
+    weekend_plan: {
+        label: '周末约会计划',
+        help: '围绕线下安排和偏好磨合，观察彼此的节奏感与配合度。'
+    },
+    future_probe: {
+        label: '未来关系试探',
+        help: '聊到城市、工作与关系节奏，测试长期相处潜力。'
+    }
+};
+
 /**
  * 生成随机用户画像并填充表单
  */
@@ -124,11 +139,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const summaryRounds = document.getElementById('summaryRounds');
     const summaryTotalRounds = document.getElementById('summaryTotalRounds');
     const summaryBadge = document.getElementById('summaryBadge');
+    const summaryScenario = document.getElementById('summaryScenario');
+    const enhancedModeToggle = document.getElementById('enhancedMode');
+    const scenarioModeSelect = document.getElementById('scenarioMode');
+    const scenarioModeHelp = document.getElementById('scenarioModeHelp');
 
     function updateSimulationSummary() {
         const candidateCount = parseInt(candidateCountSlider?.value || '10');
         const maxRounds = parseInt(maxRoundsSlider?.value || '20');
-        const totalRounds = candidateCount * maxRounds;
+        const enhancedMode = enhancedModeToggle?.checked !== false;
+        const scenarioMode = scenarioModeSelect?.value || 'first_chat';
+        const scenario = SCENARIO_OPTIONS[scenarioMode] || SCENARIO_OPTIONS.first_chat;
 
         if (candidateCountValue) {
             candidateCountValue.textContent = String(candidateCount);
@@ -146,12 +167,18 @@ document.addEventListener('DOMContentLoaded', function() {
             summaryRounds.textContent = `${maxRounds} 轮`;
         }
 
+        if (summaryScenario) {
+            summaryScenario.textContent = scenario.label;
+        }
+
         if (summaryTotalRounds) {
-            summaryTotalRounds.textContent = `${totalRounds} 轮`;
+            summaryTotalRounds.textContent = enhancedMode ? '已启用剧情增强' : '仅使用基础模拟';
         }
 
         if (summaryBadge) {
-            if (candidateCount === 1) {
+            if (!enhancedMode) {
+                summaryBadge.textContent = '基础模式';
+            } else if (candidateCount === 1) {
                 summaryBadge.textContent = '单人精聊';
             } else if (candidateCount <= 5) {
                 summaryBadge.textContent = '轻量对比';
@@ -160,6 +187,16 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 summaryBadge.textContent = '深度筛选';
             }
+        }
+
+        if (scenarioModeHelp) {
+            scenarioModeHelp.textContent = enhancedMode
+                ? scenario.help
+                : '关闭后将保留当前场景选项，但模拟时不注入事件卡和结局增强。';
+        }
+
+        if (scenarioModeSelect) {
+            scenarioModeSelect.disabled = !enhancedMode;
         }
     }
 
@@ -171,6 +208,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (maxRoundsSlider && maxRoundsValue) {
         maxRoundsSlider.addEventListener('input', function() {
+            updateSimulationSummary();
+        });
+    }
+
+    if (enhancedModeToggle) {
+        enhancedModeToggle.addEventListener('change', function() {
+            updateSimulationSummary();
+        });
+    }
+
+    if (scenarioModeSelect) {
+        scenarioModeSelect.addEventListener('change', function() {
             updateSimulationSummary();
         });
     }
@@ -259,7 +308,9 @@ document.addEventListener('DOMContentLoaded', function() {
             self_description: formData.get('self_description') || null,
             ideal_type: formData.get('ideal_type') || null,
             candidate_count: parseInt(candidateCountSlider?.value || '10'),
-            max_rounds: parseInt(maxRoundsSlider?.value || '20')
+            max_rounds: parseInt(maxRoundsSlider?.value || '20'),
+            enhanced_mode: enhancedModeToggle?.checked !== false,
+            scenario_mode: scenarioModeSelect?.value || 'first_chat'
         };
 
         // 验证数据
@@ -281,7 +332,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     candidates: response.candidates,
                     candidateCount: response.candidate_count,
                     maxRounds: response.max_rounds,
-                    userProfile: profile
+                    userProfile: profile,
+                    enhancedMode: response.enhanced_mode,
+                    scenarioMode: response.scenario_mode
                 });
 
                 showToast(`成功生成 ${response.candidate_count} 位候选人！`, 'success');

@@ -47,11 +47,18 @@ async function loadCandidates(sessionId) {
         }
 
         const candidates = sessionData.candidates;
+        const scenarioMeta = window.getScenarioMeta(sessionData.scenarioMode);
 
         // 更新候选人数显示
         const candidateCountEl = document.getElementById('candidateCount');
         if (candidateCountEl) {
             candidateCountEl.textContent = candidates.length;
+        }
+
+        const scenarioSummaryEl = document.getElementById('scenarioSummary');
+        if (scenarioSummaryEl) {
+            const enhancedText = sessionData.enhancedMode === false ? '基础模拟' : '玩法增强已开启';
+            scenarioSummaryEl.textContent = `${enhancedText} · ${scenarioMeta.label}`;
         }
 
         // 渲染候选人卡片

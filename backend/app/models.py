@@ -30,6 +30,13 @@ class SimulationStatus(str, Enum):
     RECOMMENDING = "recommending"      # 生成推荐中
 
 
+class ScenarioMode(str, Enum):
+    """玩法场景模式"""
+    FIRST_CHAT = "first_chat"
+    WEEKEND_PLAN = "weekend_plan"
+    FUTURE_PROBE = "future_probe"
+
+
 # ==================== 请求模型 ====================
 
 class UserProfileSubmit(BaseModel):
@@ -149,6 +156,8 @@ class MultiCandidateProfileSubmit(BaseModel):
     ideal_type: Optional[str] = Field(None, max_length=500, description="理想型描述")
     candidate_count: int = Field(10, ge=1, le=20, description="候选人数")
     max_rounds: int = Field(20, ge=10, le=50, description="最大对话轮数")
+    enhanced_mode: bool = Field(True, description="是否开启玩法增强")
+    scenario_mode: ScenarioMode = Field(ScenarioMode.FIRST_CHAT, description="场景模式")
 
 
 class MultiCandidateProfileResponse(BaseModel):
@@ -158,6 +167,8 @@ class MultiCandidateProfileResponse(BaseModel):
     candidates: List[BotProfile] = Field(..., description="候选人列表")
     candidate_count: int = Field(..., description="候选人数")
     max_rounds: int = Field(..., description="最大对话轮数")
+    enhanced_mode: bool = Field(..., description="是否开启玩法增强")
+    scenario_mode: ScenarioMode = Field(..., description="场景模式")
     message: str = Field(..., description="响应消息")
 
 
@@ -189,6 +200,7 @@ class CandidateRanking(BaseModel):
     name: str = Field(..., description="姓名")
     score: int = Field(..., ge=0, le=100, description="匹配分数")
     brief: str = Field(..., description="简要评价")
+    ending_label: str = Field(..., description="关系结局标签")
 
 
 class RecommendationResult(BaseModel):
@@ -196,6 +208,8 @@ class RecommendationResult(BaseModel):
     best_match_candidate_id: str = Field(..., description="最佳匹配候选人ID")
     best_match_name: str = Field(..., description="最佳匹配姓名")
     compatibility_score: int = Field(..., ge=0, le=100, description="兼容性分数")
+    ending_label: str = Field(..., description="最佳匹配关系结局")
+    ending_reason: str = Field(..., description="最佳匹配结局理由")
     reasoning: List[str] = Field(..., description="推荐理由")
     conversation_highlights: List[ConversationHighlight] = Field(..., description="对话高光时刻")
     potential_growth_areas: List[str] = Field(..., description="潜在成长空间")
@@ -273,12 +287,17 @@ class MultiCandidateSessionData:
         session_id: str,
         user_profile: Dict[str, Any],
         candidates: List[CandidateData],
-        max_rounds: int = 20
+        max_rounds: int = 20,
+        enhanced_mode: bool = True,
+        scenario_mode: ScenarioMode = ScenarioMode.FIRST_CHAT
     ):
         self.session_id = session_id
         self.user_profile = user_profile
         self.candidates = candidates  # List[CandidateData]
         self.max_rounds = max_rounds
+        self.enhanced_mode = enhanced_mode
+        self.scenario_mode = scenario_mode
+        self.event_schedule: Dict[int, Dict[str, Any]] = {}
         self.current_simulation_round = 0
         self.status = SimulationStatus.GENERATING_CANDIDATES
         self.created_at = datetime.now()
@@ -299,6 +318,9 @@ class MultiCandidateSessionData:
             "user_profile": self.user_profile,
             "candidates": [c.to_dict() for c in self.candidates],
             "max_rounds": self.max_rounds,
+            "enhanced_mode": self.enhanced_mode,
+            "scenario_mode": self.scenario_mode,
+            "event_schedule": self.event_schedule,
             "current_simulation_round": self.current_simulation_round,
             "status": self.status,
             "created_at": self.created_at.isoformat(),

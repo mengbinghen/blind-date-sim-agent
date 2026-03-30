@@ -59,6 +59,12 @@ class SimulationService:
                     "timestamp": datetime.now().isoformat()
                 })
 
+            if session.enhanced_mode and not session.event_schedule:
+                session.event_schedule = agent_service.get_event_schedule(
+                    session.scenario_mode,
+                    session.max_rounds
+                )
+
             # 逐轮模拟对话
             for round_num in range(1, session.max_rounds + 1):
                 session.current_simulation_round = round_num
@@ -70,7 +76,7 @@ class SimulationService:
                     # 并行模拟这批候选人的本轮对话
                     await asyncio.gather(*[
                         self._simulate_single_round(
-                            session.user_profile,
+                            session,
                             candidate,
                             round_num,
                             session.max_rounds
@@ -89,7 +95,7 @@ class SimulationService:
 
     async def _simulate_single_round(
         self,
-        user_profile: Dict[str, Any],
+        session: MultiCandidateSessionData,
         candidate: CandidateData,
         round_num: int,
         max_rounds: int
@@ -105,12 +111,15 @@ class SimulationService:
         """
         try:
             # 调用AI模拟本轮对话
+            event_card = session.event_schedule.get(round_num) if session.enhanced_mode else None
             result = await agent_service.simulate_conversation_round(
-                user_profile=user_profile,
+                user_profile=session.user_profile,
                 candidate_profile=candidate.bot_profile,
                 chat_history=candidate.chat_history,
                 round_num=round_num,
-                max_rounds=max_rounds
+                max_rounds=max_rounds,
+                scenario_mode=session.scenario_mode,
+                event_card=event_card
             )
 
             if result:
@@ -169,7 +178,9 @@ class SimulationService:
                         yield ('round', json.dumps({
                             'candidate_id': candidate.candidate_id,
                             'round': candidate.current_round,
-                            'messages': candidate.chat_history[-2:] if len(candidate.chat_history) >= 2 else candidate.chat_history
+                            'messages': candidate.chat_history[-2:] if len(candidate.chat_history) >= 2 else candidate.chat_history,
+                            'scenario_mode': session.scenario_mode,
+                            'event_card': session.event_schedule.get(candidate.current_round)
                         }, ensure_ascii=False))
 
                         sent_rounds[candidate.candidate_id] = candidate.current_round
@@ -233,7 +244,8 @@ class SimulationService:
                     'messages_count': len(c.chat_history)
                 }
                 for c in session.candidates
-            ]
+            ],
+            'scenario_mode': session.scenario_mode
         }
 
 

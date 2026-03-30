@@ -25,17 +25,34 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
 
+    // 初始化标签切换
+    initTabs();
+
     // 加载推荐结果
     loadRecommendation(sessionId);
-
-    // 查看所有对话按钮
-    const viewAllConversationsBtn = document.getElementById('viewAllConversationsBtn');
-    if (viewAllConversationsBtn) {
-        viewAllConversationsBtn.addEventListener('click', function() {
-            window.location.href = `/simulation.html?session_id=${sessionId}`;
-        });
-    }
 });
+
+/**
+ * 初始化标签切换
+ */
+function initTabs() {
+    const tabs = document.querySelectorAll('.rec-tab');
+    const panels = document.querySelectorAll('.rec-tab-panel');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            const targetTab = this.dataset.tab;
+
+            // 移除所有active状态
+            tabs.forEach(t => t.classList.remove('active'));
+            panels.forEach(p => p.classList.remove('active'));
+
+            // 添加active状态
+            this.classList.add('active');
+            document.getElementById(`panel-${targetTab}`).classList.add('active');
+        });
+    });
+}
 
 /**
  * 加载推荐结果
@@ -100,21 +117,24 @@ function renderBestMatch(rec, candidates) {
     document.getElementById('bestMatchName').textContent = bestCandidate?.name || rec.best_match_name;
     document.getElementById('bestMatchDetails').textContent = bestCandidate ? `${bestCandidate.age}岁 · ${bestCandidate.occupation}` : '';
     document.getElementById('bestMatchInterests').textContent = bestCandidate?.interests || '';
+    document.getElementById('bestMatchEnding').textContent = rec.ending_label || '适合慢慢了解';
+    document.getElementById('bestMatchEnding').className = `ending-badge ${getEndingClass(rec.ending_label)}`;
+    document.getElementById('bestMatchEndingReason').textContent = rec.ending_reason || '你们之间有继续了解的空间。';
 
     // 渲染分数
     const scoreEl = document.getElementById('compatibilityScore');
     scoreEl.textContent = rec.compatibility_score;
 
     // 根据分数设置颜色等级
-    scoreEl.className = 'score-circle';
+    scoreEl.className = 'score-number';
     if (rec.compatibility_score >= 90) {
-        scoreEl.classList.add('excellent');
+        scoreEl.style.color = '#2ed573';
     } else if (rec.compatibility_score >= 80) {
-        scoreEl.classList.add('good');
+        scoreEl.style.color = '#3742fa';
     } else if (rec.compatibility_score >= 70) {
-        scoreEl.classList.add('average');
+        scoreEl.style.color = '#ffa502';
     } else {
-        scoreEl.classList.add('poor');
+        scoreEl.style.color = '#ff6348';
     }
 
     // 渲染推荐理由
@@ -168,16 +188,17 @@ function renderRankings(rankings, candidates, bestMatchCandidateId) {
     }
 
     rankingsEl.innerHTML = `
-        <table class="ranking-table">
+        <table class="ranking-table-compact">
             <thead>
                 <tr>
                     <th>排名</th>
                     <th>候选人</th>
-                    <th>匹配分数</th>
+                    <th>分数</th>
+                    <th>结局</th>
                     <th>简评</th>
                 </tr>
             </thead>
-                <tbody>
+            <tbody>
                 ${rankings.map((r, index) => {
                     const candidate = getCandidateByIdOrName(candidates, r.candidate_id, r.name);
                     const rankIcon = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}`;
@@ -191,6 +212,9 @@ function renderRankings(rankings, candidates, bestMatchCandidateId) {
                             </td>
                             <td class="score-cell">
                                 <span class="score-badge ${getScoreClass(r.score)}">${r.score}</span>
+                            </td>
+                            <td class="ending-cell">
+                                <span class="ending-badge ${getEndingClass(r.ending_label)}">${r.ending_label || '适合慢慢了解'}</span>
                             </td>
                             <td class="brief-cell">${r.brief}</td>
                         </tr>
@@ -208,5 +232,13 @@ function getScoreClass(score) {
     if (score >= 90) return 'excellent';
     if (score >= 80) return 'good';
     if (score >= 70) return 'average';
+    return 'poor';
+}
+
+function getEndingClass(label) {
+    if (!label) return 'average';
+    if (label === '互有好感') return 'excellent';
+    if (label === '建议继续接触') return 'good';
+    if (label === '适合慢慢了解') return 'average';
     return 'poor';
 }

@@ -9,6 +9,8 @@ let candidateConversations = {};  // { candidate_id: { messages: [], currentRoun
 let simulationComplete = false;
 let pollingInterval = null;  // 轮询定时器
 let maxRounds = 20;  // 最大对话轮数，从会话数据中获取
+let currentScenarioMode = 'first_chat';
+let currentEventCard = null;
 
 function getCandidateKey(candidate) {
     return candidate?.candidate_id || candidate?.name || '';
@@ -51,6 +53,7 @@ async function initSimulation(sessionId) {
 
         candidates = sessionData.candidates;
         maxRounds = sessionData.maxRounds || 20;  // 从会话数据获取最大轮数
+        currentScenarioMode = sessionData.scenarioMode || 'first_chat';
 
         console.log('Session maxRounds:', maxRounds);
 
@@ -64,6 +67,7 @@ async function initSimulation(sessionId) {
 
         // 渲染候选人列表
         renderCandidateList(candidates);
+        renderScenarioBanner();
 
         // 默认显示第一个候选人
         showCandidate(0);
@@ -127,9 +131,32 @@ function showCandidate(index) {
 
     // 更新轮次显示
     document.getElementById('roundIndicator').textContent = `第 ${conversation.currentRound}/${maxRounds} 轮`;
+    renderScenarioBanner();
 
     // 渲染对话消息
     renderMessages(conversation.messages);
+}
+
+function renderScenarioBanner() {
+    const scenarioMeta = window.getScenarioMeta(currentScenarioMode);
+    const scenarioModeLabel = document.getElementById('scenarioModeLabel');
+    const eventCardBanner = document.getElementById('eventCardBanner');
+
+    if (scenarioModeLabel) {
+        scenarioModeLabel.textContent = scenarioMeta.label;
+    }
+
+    if (!eventCardBanner) {
+        return;
+    }
+
+    if (currentEventCard && currentEventCard.title) {
+        eventCardBanner.style.display = 'block';
+        eventCardBanner.textContent = `事件卡 · ${currentEventCard.title}：${currentEventCard.cue}`;
+    } else {
+        eventCardBanner.style.display = 'none';
+        eventCardBanner.textContent = '';
+    }
 }
 
 /**
@@ -204,6 +231,8 @@ function connectSimulationStream(sessionId) {
 function handleRoundUpdate(data) {
     console.log('handleRoundUpdate called with:', data);
     const { candidate_id, round, messages } = data;
+    currentScenarioMode = data.scenario_mode || currentScenarioMode;
+    currentEventCard = data.event_card || null;
 
     // 通过 candidate_id 找到对应的候选人
     let candidateIndex = -1;
@@ -251,6 +280,8 @@ function handleRoundUpdate(data) {
     const activeTab = document.querySelector('.candidate-tab.active');
     if (activeTab && parseInt(activeTab.dataset.index) === candidateIndex) {
         showCandidate(candidateIndex);
+    } else {
+        renderScenarioBanner();
     }
 }
 
