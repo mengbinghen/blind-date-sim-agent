@@ -5,6 +5,67 @@ AI模拟对话提示词模板
 from typing import Dict, Any, List
 
 
+SCENARIO_CONFIGS: Dict[str, Dict[str, Any]] = {
+    "first_chat": {
+        "label": "初识聊天",
+        "summary": "围绕第一印象、共同兴趣和聊天舒适感推进关系。",
+        "stage_goal": "先建立基本好感，再自然试探是否愿意继续接触。",
+        "events": [
+            {
+                "key": "common_interest",
+                "title": "共同兴趣深入",
+                "cue": "双方发现了一个共同兴趣，需要把话题从表面喜好聊到具体经历和真实感受。",
+                "goal": "建立真实共鸣，而不是浅层附和。"
+            },
+            {
+                "key": "meeting_signal",
+                "title": "是否愿意见面",
+                "cue": "聊天已经顺了一段时间，双方会自然试探是否愿意线下见面或继续保持联系。",
+                "goal": "给出清晰但不冒进的关系推进信号。"
+            }
+        ]
+    },
+    "weekend_plan": {
+        "label": "周末约会计划",
+        "summary": "围绕第一次线下安排，观察节奏、偏好和临场应对。",
+        "stage_goal": "从轻松设想到偏好磨合，看双方能否一起把计划落地。",
+        "events": [
+            {
+                "key": "preference_difference",
+                "title": "安排偏好差异",
+                "cue": "两人对周末安排的节奏或活动类型有点不同，需要沟通取舍。",
+                "goal": "展现尊重、表达偏好，并尝试找到折中方案。"
+            },
+            {
+                "key": "plan_change",
+                "title": "临时变化应对",
+                "cue": "原本的安排遇到小变化，比如天气、加班或临时改时间，需要调整计划。",
+                "goal": "观察双方处理变化时的情绪和合作感。"
+            }
+        ]
+    },
+    "future_probe": {
+        "label": "未来关系试探",
+        "summary": "围绕工作、城市和关系节奏，测试长期相处潜力。",
+        "stage_goal": "在不沉重的前提下聊到现实选择和关系期待。",
+        "events": [
+            {
+                "key": "city_choice",
+                "title": "城市与工作取舍",
+                "cue": "双方会聊到未来工作发展、是否愿意换城市或怎样平衡现实机会。",
+                "goal": "看价值观和生活规划是否兼容。"
+            },
+            {
+                "key": "pace_expectation",
+                "title": "关系节奏预期",
+                "cue": "双方开始试探关系推进速度，比如多久见面、如何确认关系、各自对稳定关系的期待。",
+                "goal": "给出成熟、真诚的关系态度。"
+            }
+        ]
+    }
+}
+
+
 def format_user_profile(user_profile: Dict[str, Any]) -> str:
     """格式化用户资料"""
     return f"""性别: {user_profile.get('gender', '未知')}
@@ -42,18 +103,65 @@ def format_chat_history(chat_history: List[Dict[str, str]]) -> str:
     return "\n".join(formatted)
 
 
+def get_scenario_config(scenario_mode: str) -> Dict[str, Any]:
+    """获取场景配置，未知场景回退到初识聊天。"""
+    scenario_key = getattr(scenario_mode, "value", scenario_mode)
+    return SCENARIO_CONFIGS.get(str(scenario_key), SCENARIO_CONFIGS["first_chat"])
+
+
+def get_scenario_label(scenario_mode: str) -> str:
+    """获取场景中文名。"""
+    return get_scenario_config(scenario_mode)["label"]
+
+
+def build_event_schedule(
+    scenario_mode: str,
+    max_rounds: int
+) -> Dict[int, Dict[str, Any]]:
+    """根据场景和总轮次生成固定事件日程。"""
+    config = get_scenario_config(scenario_mode)
+    event_round_one = min(max_rounds - 2, max(3, round(max_rounds * 0.4)))
+    event_round_two = min(max_rounds - 1, max(event_round_one + 2, round(max_rounds * 0.8)))
+
+    if event_round_two <= event_round_one:
+        event_round_two = min(max_rounds, event_round_one + 1)
+
+    schedule = {}
+    event_rounds = [event_round_one, event_round_two]
+
+    for round_num, event in zip(event_rounds, config["events"]):
+        schedule[round_num] = {
+            "round": round_num,
+            "title": event["title"],
+            "cue": event["cue"],
+            "goal": event["goal"]
+        }
+
+    return schedule
+
+
 def get_dual_simulation_prompt(
     user_profile: Dict[str, Any],
     candidate_profile: Dict[str, Any],
     chat_history: List[Dict[str, str]],
     round_num: int,
-    max_rounds: int
+    max_rounds: int,
+    scenario_mode: str = "first_chat",
+    event_card: Dict[str, Any] = None
 ) -> str:
     """
     生成双角色模拟对话提示词
 
     使用单次LLM调用同时模拟用户和候选人的对话
     """
+    scenario = get_scenario_config(scenario_mode)
+    event_section = "本轮没有额外事件卡，请自然推进关系。"
+    if event_card:
+        event_section = f"""本轮事件卡：{event_card.get('title', '事件推进')}
+- 事件提示：{event_card.get('cue', '')}
+- 事件目标：{event_card.get('goal', '')}
+- 要求：本轮对话必须围绕这张事件卡自然展开，但不要写成任务说明口吻。"""
+
     return f"""你是一位专业的相亲对话模拟专家。你需要同时模拟对话的双方：真实用户和相亲候选人。
 
 【用户画像】
@@ -66,11 +174,19 @@ def get_dual_simulation_prompt(
 
 候选人需要完全按照上述人设进行回应。
 
+【当前玩法场景】
+- 场景模式：{scenario['label']}
+- 场景说明：{scenario['summary']}
+- 本场景目标：{scenario['stage_goal']}
+
 【对话上下文】
 第 {round_num}/{max_rounds} 轮对话
 
 之前的对话历史：
 {format_chat_history(chat_history)}
+
+【事件推进】
+{event_section}
 
 【对话阶段指南】
 - 第1-3轮：破冰阶段——互相问候，建立初步印象，聊聊兴趣职业
@@ -95,6 +211,9 @@ def get_dual_simulation_prompt(
 - 加入细节描述：具体的经历、感受、想法，让对话生动真实
 - 保持人设一致性，但要让对话有发展变化
 - 可以有追问、感叹、停顿语气，更贴近真实对话节奏
+- 如果本轮有事件卡，必须体现在双方对话内容里，而不是忽略掉
+- 当轮次进入后 25% 时，请自然体现双方是否愿意继续推进关系的信号
+- **禁止括号描述**：不要使用括号内的动作或表情描述，如"（微笑）"、"（点头）"、"（害羞）"、"（思考片刻）"等
 
 【对话技巧】
 - 多用"我觉得""我之前""我特别喜欢"等表达个人感受
@@ -190,6 +309,7 @@ def get_multi_candidate_generation_prompt(
 def get_comparative_recommendation_prompt(
     user_profile: Dict[str, Any],
     candidates: List[Any],
+    scenario_mode: str = "first_chat",
     max_highlights: int = 3
 ) -> str:
     """
@@ -228,10 +348,16 @@ def get_comparative_recommendation_prompt(
 
     all_conversations = "\n".join(conversations_summary)
 
+    scenario = get_scenario_config(scenario_mode)
+
     return f"""你是一位经验丰富的婚恋顾问和情感分析专家。请分析用户与 {len(candidates)} 位候选人的相亲对话，找出最匹配的人选。
 
 【用户资料】
 {format_user_profile(user_profile)}
+
+【玩法场景】
+- 场景模式：{scenario['label']}
+- 场景说明：{scenario['summary']}
 
 【所有对话记录】
 {all_conversations}
@@ -246,6 +372,12 @@ def get_comparative_recommendation_prompt(
 【任务】
 请从 {len(candidates)} 位候选人中选出最匹配的1位，并说明理由。
 
+【结局标签可选值】
+- 互有好感
+- 建议继续接触
+- 适合慢慢了解
+- 更适合做朋友
+
 【输出格式】
 严格按照以下JSON格式输出：
 
@@ -254,6 +386,8 @@ def get_comparative_recommendation_prompt(
     "best_match_candidate_id": "{candidates[0].candidate_id if candidates else ''}",
     "best_match_name": "候选人姓名",
     "compatibility_score": 85,
+    "ending_label": "建议继续接触",
+    "ending_reason": "一句话说明为什么适合继续推进关系",
     "reasoning": [
         "对话流畅自然，双方都有回应",
         "价值观高度契合，都重视XX",
@@ -268,8 +402,8 @@ def get_comparative_recommendation_prompt(
         "在XX方面可能需要更多沟通"
     ],
     "all_candidates_ranking": [
-        {{"candidate_id": "...", "name": "...", "score": 85, "brief": "简短评价（15字内）"}},
-        {{"candidate_id": "...", "name": "...", "score": 78, "brief": "简短评价"}}
+        {{"candidate_id": "...", "name": "...", "score": 85, "brief": "简短评价（15字内）", "ending_label": "互有好感"}},
+        {{"candidate_id": "...", "name": "...", "score": 78, "brief": "简短评价", "ending_label": "适合慢慢了解"}}
     ]
 }}
 ```

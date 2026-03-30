@@ -128,11 +128,19 @@
                 </div>
 
                 <div class="form-actions">
-                    <button type="submit" class="btn btn-primary btn-large" id="submitBtn">
-                        <span class="btn-text">生成候选人</span>
-                        <span class="btn-loading" style="display: none;">正在生成...</span>
-                    </button>
-                    <p class="form-action-hint">提交后会先生成候选人，再自动进入模拟流程</p>
+                    <div class="form-actions-main">
+                        <button type="submit" class="btn btn-primary btn-large" id="submitBtn">
+                            <span class="btn-text">生成候选人</span>
+                            <span class="btn-loading" style="display: none;">正在生成...</span>
+                        </button>
+                        <div class="quick-experience-inline">
+                            <span class="quick-experience-icon">🎲</span>
+                            <button type="button" class="btn btn-secondary btn-outline" id="randomProfileBtn">
+                                随机生成
+                            </button>
+                        </div>
+                    </div>
+                    <p class="form-action-hint">提交后会先生成候选人，再自动进入模拟流程 · 或点击"随机生成"快速体验</p>
                 </div>
             </form>
         </div>
@@ -165,6 +173,29 @@
                     <p class="config-help">轮数越高，对话更完整，也会带来更长的等待时间。</p>
                 </div>
 
+                <div class="config-item feature-toggle-item">
+                    <div class="toggle-row">
+                        <div>
+                            <label for="enhancedMode">玩法增强</label>
+                            <p class="config-help">默认开启场景模式、事件卡和结局卡，让整轮模拟更有剧情推进感。</p>
+                        </div>
+                        <label class="switch" for="enhancedMode">
+                            <input type="checkbox" id="enhancedMode" name="enhanced_mode" checked>
+                            <span class="switch-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="config-item">
+                    <label for="scenarioMode">场景模式</label>
+                    <select id="scenarioMode" name="scenario_mode" class="config-select">
+                        <option value="first_chat" selected>初识聊天</option>
+                        <option value="weekend_plan">周末约会计划</option>
+                        <option value="future_probe">未来关系试探</option>
+                    </select>
+                    <p class="config-help" id="scenarioModeHelp">从第一印象聊到共同兴趣，再自然试探是否愿意继续接触。</p>
+                </div>
+
                 <div class="simulation-summary" id="simulationSummary">
                     <div class="summary-header">
                         <span>本次模拟摘要</span>
@@ -179,23 +210,16 @@
                             <span class="summary-label">每人轮数</span>
                             <strong id="summaryRounds">20 轮</strong>
                         </div>
+                        <div class="summary-item">
+                            <span class="summary-label">玩法场景</span>
+                            <strong id="summaryScenario">初识聊天</strong>
+                        </div>
                         <div class="summary-item summary-item-wide">
-                            <span class="summary-label">预计总轮次</span>
-                            <strong id="summaryTotalRounds">200 轮</strong>
+                            <span class="summary-label">玩法状态</span>
+                            <strong id="summaryTotalRounds">已启用剧情增强</strong>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <div class="sidebar-card">
-                <div class="sidebar-card-header">
-                    <span class="sidebar-icon">🎲</span>
-                    <h3>快速体验</h3>
-                </div>
-                <button type="button" class="btn btn-secondary btn-outline" id="randomProfileBtn" style="width: 100%;">
-                    随机生成用户画像
-                </button>
-                <p class="sidebar-hint">快速体验，随机生成一个虚拟用户资料</p>
             </div>
         </aside>
     </div>

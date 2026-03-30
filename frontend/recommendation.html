@@ -7,10 +7,12 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="recommendation-page">
-    <div class="container">
-        <div class="header">
+    <div class="recommendation-container">
+        <!-- 页面头部 -->
+        <div class="rec-header">
             <h1>🏆 最佳匹配推荐</h1>
             <p class="subtitle">AI已分析所有对话，为您找到最匹配的相亲对象</p>
+            <a href="/" class="rec-back-btn">返回主界面</a>
         </div>
 
         <!-- 加载状态 -->
@@ -21,66 +23,102 @@
 
         <!-- 推荐结果内容 -->
         <div id="recommendationContent" class="recommendation-content" style="display: none;">
-            <!-- 最佳匹配卡片 -->
-            <div class="best-match-card">
-                <div class="match-header">
-                    <span class="trophy-icon">🏆</span>
-                    <h2>最佳匹配</h2>
-                </div>
-                <div class="match-profile">
-                    <div id="bestMatchAvatar" class="match-avatar">👩</div>
-                    <div class="match-info">
-                        <h3 id="bestMatchName">候选人姓名</h3>
-                        <p id="bestMatchDetails">26岁 · 产品经理</p>
-                        <p id="bestMatchInterests" class="interests">瑜伽、阅读、旅行</p>
+            <!-- 标签导航 -->
+            <div class="rec-tabs">
+                <button class="rec-tab active" data-tab="best-match">
+                    <span class="tab-icon">🏆</span>
+                    <span class="tab-label">最佳匹配</span>
+                </button>
+                <button class="rec-tab" data-tab="highlights">
+                    <span class="tab-icon">💬</span>
+                    <span class="tab-label">对话高光</span>
+                </button>
+                <button class="rec-tab" data-tab="growth">
+                    <span class="tab-icon">🌱</span>
+                    <span class="tab-label">成长空间</span>
+                </button>
+                <button class="rec-tab" data-tab="rankings">
+                    <span class="tab-icon">📊</span>
+                    <span class="tab-label">候选人排名</span>
+                </button>
+            </div>
+
+            <!-- 标签内容区域 -->
+            <div class="rec-tab-content">
+                <!-- 最佳匹配标签页 -->
+                <div class="rec-tab-panel active" id="panel-best-match">
+                    <div class="best-match-card">
+                        <div class="match-header">
+                            <span class="trophy-icon">🏆</span>
+                            <h2>最佳匹配</h2>
+                        </div>
+                        <div class="match-body">
+                            <div class="match-profile">
+                                <div id="bestMatchAvatar" class="match-avatar">👩</div>
+                                <div class="match-info">
+                                    <h3 id="bestMatchName">候选人姓名</h3>
+                                    <p id="bestMatchDetails">26岁 · 产品经理</p>
+                                    <p id="bestMatchInterests" class="interests">瑜伽、阅读、旅行</p>
+                                </div>
+                            </div>
+                            <div class="match-metrics">
+                                <div class="match-score-inline">
+                                    <span id="compatibilityScore" class="score-number">85</span>
+                                    <span class="score-label">兼容性评分</span>
+                                </div>
+                                <div class="match-ending">
+                                    <span id="bestMatchEnding" class="ending-badge">建议继续接触</span>
+                                    <p id="bestMatchEndingReason" class="ending-reason">你们的关系有继续了解的空间。</p>
+                                </div>
+                            </div>
+                            <div class="match-reasoning">
+                                <h4>推荐理由</h4>
+                                <ul id="reasoningList" class="reason-list">
+                                    <!-- 推荐理由将通过JS动态生成 -->
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="match-score">
-                    <div id="compatibilityScore" class="score-circle">85</div>
-                    <p class="score-label">兼容性评分</p>
-                </div>
-                <div class="match-reasoning">
-                    <h4>推荐理由</h4>
-                    <ul id="reasoningList" class="reason-list">
-                        <!-- 推荐理由将通过JS动态生成 -->
-                    </ul>
-                </div>
-            </div>
 
-            <!-- 对话高光时刻 -->
-            <div class="highlights-section card">
-                <div class="card-header">
-                    <h3>💬 对话高光时刻</h3>
+                <!-- 对话高光标签页 -->
+                <div class="rec-tab-panel" id="panel-highlights">
+                    <div class="highlights-section">
+                        <div class="panel-title">
+                            <h3>💬 对话高光时刻</h3>
+                            <p class="panel-subtitle">这些关键时刻展现了你们之间的化学反应</p>
+                        </div>
+                        <div id="conversationHighlights" class="highlights-list">
+                            <!-- 高光时刻将通过JS动态生成 -->
+                        </div>
+                    </div>
                 </div>
-                <div id="conversationHighlights" class="highlights-list">
-                    <!-- 高光时刻将通过JS动态生成 -->
-                </div>
-            </div>
 
-            <!-- 成长空间 -->
-            <div class="growth-section card">
-                <div class="card-header">
-                    <h3>🌱 潜在成长空间</h3>
+                <!-- 成长空间标签页 -->
+                <div class="rec-tab-panel" id="panel-growth">
+                    <div class="growth-section">
+                        <div class="panel-title">
+                            <h3>🌱 潜在成长空间</h3>
+                            <p class="panel-subtitle">继续了解可能带来更多惊喜</p>
+                        </div>
+                        <ul id="growthAreas" class="growth-list">
+                            <!-- 成长空间将通过JS动态生成 -->
+                        </ul>
+                    </div>
                 </div>
-                <ul id="growthAreas" class="growth-list">
-                    <!-- 成长空间将通过JS动态生成 -->
-                </ul>
-            </div>
 
-            <!-- 所有候选人排名 -->
-            <div class="rankings-section card">
-                <div class="card-header">
-                    <h3>📊 所有候选人排名</h3>
+                <!-- 候选人排名标签页 -->
+                <div class="rec-tab-panel" id="panel-rankings">
+                    <div class="rankings-section">
+                        <div class="panel-title">
+                            <h3>📊 所有候选人排名</h3>
+                            <p class="panel-subtitle">基于对话质量和匹配度的综合评估</p>
+                        </div>
+                        <div id="allRankings" class="rankings-table-compact">
+                            <!-- 排名表格将通过JS动态生成 -->
+                        </div>
+                    </div>
                 </div>
-                <div id="allRankings" class="rankings-table">
-                    <!-- 排名表格将通过JS动态生成 -->
-                </div>
-            </div>
-
-            <!-- 操作按钮 -->
-            <div class="result-actions">
-                <a href="/" class="btn btn-primary btn-large">返回主界面</a>
-                <button id="viewAllConversationsBtn" class="btn btn-secondary btn-outline">查看所有对话</button>
             </div>
         </div>
     </div>
@@ -88,6 +126,6 @@
     <div id="toast" class="toast"></div>
 
     <script src="js/api.js?v=1.1"></script>
-    <script src="js/recommendation.js?v=1.1"></script>
+    <script src="js/recommendation.js?v=1.2"></script>
 </body>
 </html>

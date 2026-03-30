@@ -18,12 +18,20 @@ from app.prompts.simulation_prompts import (
     get_multi_candidate_generation_prompt,
     get_comparative_recommendation_prompt,
     get_opening_message_for_candidate,
-    format_chat_history
+    format_chat_history,
+    build_event_schedule
 )
 
 
 class AgentService:
     """AI Agent服务类"""
+
+    VALID_ENDING_LABELS = {
+        "互有好感",
+        "建议继续接触",
+        "适合慢慢了解",
+        "更适合做朋友"
+    }
 
     def __init__(self):
         """初始化Agent服务"""
@@ -623,7 +631,9 @@ class AgentService:
         candidate_profile: Dict[str, Any],
         chat_history: List[Dict[str, str]],
         round_num: int,
-        max_rounds: int
+        max_rounds: int,
+        scenario_mode: str = "first_chat",
+        event_card: Optional[Dict[str, Any]] = None
     ) -> Optional[Dict[str, Any]]:
         """
         模拟一轮对话（AI同时模拟用户和候选人）
@@ -644,7 +654,9 @@ class AgentService:
                 candidate_profile,
                 chat_history,
                 round_num,
-                max_rounds
+                max_rounds,
+                scenario_mode=scenario_mode,
+                event_card=event_card
             )
 
             messages = [
@@ -692,6 +704,20 @@ class AgentService:
         index = min(round_num - 1, len(fallback_rounds) - 1)
         return fallback_rounds[index]
 
+    def get_event_schedule(
+        self,
+        scenario_mode: str,
+        max_rounds: int
+    ) -> Dict[int, Dict[str, Any]]:
+        """生成固定事件日程。"""
+        return build_event_schedule(scenario_mode, max_rounds)
+
+    def _normalize_ending_label(self, label: Optional[str]) -> str:
+        """规范化关系结局标签。"""
+        if label in self.VALID_ENDING_LABELS:
+            return label
+        return "适合慢慢了解"
+
     def _normalize_recommendation_result(
         self,
         result: Dict[str, Any],
@@ -731,7 +757,8 @@ class AgentService:
                 "candidate_id": candidate.candidate_id,
                 "name": candidate.bot_profile.get("name", "未知"),
                 "score": max(0, min(100, int(ranking.get("score", 70)))),
-                "brief": ranking.get("brief", "待补充评价")
+                "brief": ranking.get("brief", "待补充评价"),
+                "ending_label": self._normalize_ending_label(ranking.get("ending_label"))
             })
             seen_candidate_ids.add(candidate.candidate_id)
 
@@ -743,7 +770,8 @@ class AgentService:
                 "candidate_id": candidate.candidate_id,
                 "name": candidate.bot_profile.get("name", "未知"),
                 "score": 60,
-                "brief": "待补充评价"
+                "brief": "待补充评价",
+                "ending_label": "适合慢慢了解"
             })
 
         best_candidate = resolve_candidate(
@@ -757,6 +785,8 @@ class AgentService:
 
         result["best_match_candidate_id"] = best_candidate.candidate_id
         result["best_match_name"] = best_candidate.bot_profile.get("name", "未知")
+        result["ending_label"] = self._normalize_ending_label(result.get("ending_label"))
+        result["ending_reason"] = result.get("ending_reason", "双方关系有继续了解的空间。")
 
         best_candidate_id = result["best_match_candidate_id"]
         normalized_rankings.sort(
@@ -769,7 +799,8 @@ class AgentService:
     async def generate_comparative_recommendation(
         self,
         user_profile: Dict[str, Any],
-        candidates: List[Any]
+        candidates: List[Any],
+        scenario_mode: str = "first_chat"
     ) -> Optional[Dict[str, Any]]:
         """
         生成比较推荐（分析所有候选人对话，推荐最佳匹配）
@@ -782,7 +813,11 @@ class AgentService:
             推荐结果字典，失败返回None
         """
         try:
-            prompt = get_comparative_recommendation_prompt(user_profile, candidates)
+            prompt = get_comparative_recommendation_prompt(
+                user_profile,
+                candidates,
+                scenario_mode=scenario_mode
+            )
 
             messages = [
                 {"role": "system", "content": "你是一位经验丰富的婚恋顾问和情感分析专家。请严格按照要求的JSON格式输出推荐结果。"},
@@ -826,13 +861,16 @@ class AgentService:
                 "candidate_id": c.candidate_id,
                 "name": c.bot_profile.get("name", "未知"),
                 "score": max(50, score),
-                "brief": f"对话{len(c.chat_history)}轮，{'较流畅' if len(c.chat_history) > 5 else '一般'}"
+                "brief": f"对话{len(c.chat_history)}轮，{'较流畅' if len(c.chat_history) > 5 else '一般'}",
+                "ending_label": "适合慢慢了解" if i > 0 else "建议继续接触"
             })
 
         return {
             "best_match_candidate_id": best_candidate.candidate_id,
             "best_match_name": best_candidate.bot_profile.get("name", "未知"),
             "compatibility_score": 75,
+            "ending_label": "建议继续接触",
+            "ending_reason": "双方整体交流顺畅，值得继续了解。",
             "reasoning": [
                 "双方对话较为顺畅",
                 "有一定共同话题",

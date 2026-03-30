@@ -5,7 +5,14 @@
 import uuid
 from typing import Dict, Optional, Any
 from datetime import datetime, timedelta
-from app.models import SessionData, SessionStatus, CandidateData, MultiCandidateSessionData, SimulationStatus
+from app.models import (
+    SessionData,
+    SessionStatus,
+    CandidateData,
+    MultiCandidateSessionData,
+    SimulationStatus,
+    ScenarioMode
+)
 from app.config import Config
 
 
@@ -155,7 +162,9 @@ class SessionService:
         self,
         user_profile: Dict[str, Any],
         candidates: list,
-        max_rounds: int = 20
+        max_rounds: int = 20,
+        enhanced_mode: bool = True,
+        scenario_mode: ScenarioMode = ScenarioMode.FIRST_CHAT
     ) -> MultiCandidateSessionData:
         """
         创建多候选人会话
@@ -189,7 +198,9 @@ class SessionService:
             session_id=session_id,
             user_profile=user_profile,
             candidates=candidate_data_list,
-            max_rounds=max_rounds
+            max_rounds=max_rounds,
+            enhanced_mode=enhanced_mode,
+            scenario_mode=scenario_mode
         )
         session.status = SimulationStatus.READY
 

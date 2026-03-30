@@ -101,7 +101,9 @@ async def submit_profile_multi_candidate(profile: MultiCandidateProfileSubmit):
         session = session_service.create_multi_candidate_session(
             user_profile=user_profile,
             candidates=candidates,
-            max_rounds=profile.max_rounds
+            max_rounds=profile.max_rounds,
+            enhanced_mode=profile.enhanced_mode,
+            scenario_mode=profile.scenario_mode
         )
 
         # 构建候选人资料响应列表
@@ -141,6 +143,8 @@ async def submit_profile_multi_candidate(profile: MultiCandidateProfileSubmit):
             candidates=bot_profiles,
             candidate_count=len(bot_profiles),
             max_rounds=profile.max_rounds,
+            enhanced_mode=profile.enhanced_mode,
+            scenario_mode=profile.scenario_mode,
             message=f"已生成{len(bot_profiles)}位候选人，即将开始AI模拟对话"
         )
 

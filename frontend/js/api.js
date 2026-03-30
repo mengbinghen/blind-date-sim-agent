@@ -5,6 +5,21 @@
 
 console.log('api.js loaded successfully');
 
+const SCENARIO_META = {
+    first_chat: {
+        label: '初识聊天',
+        description: '从第一印象聊到共同兴趣，再自然试探是否愿意继续接触。'
+    },
+    weekend_plan: {
+        label: '周末约会计划',
+        description: '围绕线下安排和偏好磨合，观察彼此的节奏感与配合度。'
+    },
+    future_probe: {
+        label: '未来关系试探',
+        description: '聊到城市、工作与关系节奏，测试长期相处潜力。'
+    }
+};
+
 // 动态获取 API 基础 URL
 // 如果页面从静态服务器访问（如 file:// 或其他端口），则使用默认地址
 // 否则使用当前页面的协议和主机
@@ -23,6 +38,10 @@ function getApiBaseUrl() {
 }
 
 const API_BASE_URL = getApiBaseUrl();
+
+function getScenarioMeta(mode) {
+    return SCENARIO_META[mode] || SCENARIO_META.first_chat;
+}
 
 /**
  * 通用API调用函数
@@ -231,6 +250,7 @@ function formatTime(date) {
 
 // 暴露函数到全局作用域，确保可以跨文件调用
 window.getApiBaseUrl = getApiBaseUrl;
+window.getScenarioMeta = getScenarioMeta;
 window.submitMultiCandidateProfile = submitMultiCandidateProfile;
 window.startSimulation = startSimulation;
 window.getSimulationStatus = getSimulationStatus;
