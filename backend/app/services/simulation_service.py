@@ -59,6 +59,8 @@ class SimulationService:
                     "timestamp": datetime.now().isoformat()
                 })
 
+            # enhanced_mode=True时初始化事件日程
+            # enhanced_mode=False时event_schedule保持为空字典{}
             if session.enhanced_mode and not session.event_schedule:
                 session.event_schedule = agent_service.get_event_schedule(
                     session.scenario_mode,
@@ -111,7 +113,8 @@ class SimulationService:
         """
         try:
             # 调用AI模拟本轮对话
-            event_card = session.event_schedule.get(round_num) if session.enhanced_mode else None
+            # event_schedule在非enhanced_mode下为空字典，.get()自然返回None
+            event_card = session.event_schedule.get(round_num)
             result = await agent_service.simulate_conversation_round(
                 user_profile=session.user_profile,
                 candidate_profile=candidate.bot_profile,

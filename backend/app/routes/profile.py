@@ -109,12 +109,10 @@ async def submit_profile_multi_candidate(profile: MultiCandidateProfileSubmit):
         # 构建候选人资料响应列表
         bot_profiles = []
         for candidate in candidates:
-            # 转换性别值：中文转英文
+            # 性别已在agent_service中标准化，这里添加防御性检查
             gender_value = candidate.get("gender", "female")
-            if gender_value == "男":
-                gender_value = "male"
-            elif gender_value == "女":
-                gender_value = "female"
+            from app.utils.normalization import normalize_gender
+            gender_value = normalize_gender(gender_value)
 
             # 获取城市，优先使用候选人自己的城市，否则使用用户所在城市
             city = candidate.get("city") or user_profile.get("city") or "未知"

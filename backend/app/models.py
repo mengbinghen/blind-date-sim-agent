@@ -4,7 +4,7 @@
 """
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
-from datetime import datetime
+from datetime import datetime, timedelta
 from enum import Enum
 
 
@@ -264,6 +264,35 @@ class SessionData:
         self.status = SessionStatus.CHATTING
         self.created_at = datetime.now()
         self.evaluation: Optional[EvaluationResult] = None
+        self._expire_cache = None  # 过期状态缓存
+        self._expire_cache_time = None  # 缓存时间
+
+    def is_expired(self, expire_minutes: int) -> bool:
+        """
+        检查会话是否过期（带缓存）
+
+        Args:
+            expire_minutes: 过期分钟数
+
+        Returns:
+            是否过期
+        """
+        now = datetime.now()
+
+        # 如果缓存存在且未过期（1分钟内），直接使用缓存
+        if (self._expire_cache is not None and
+            self._expire_cache_time is not None and
+            (now - self._expire_cache_time).total_seconds() < 60):
+            return self._expire_cache
+
+        # 重新计算并缓存
+        expire_time = timedelta(minutes=expire_minutes)
+        is_expired = now - self.created_at > expire_time
+
+        self._expire_cache = is_expired
+        self._expire_cache_time = now
+
+        return is_expired
 
     def to_dict(self) -> Dict[str, Any]:
         """转换为字典"""
@@ -303,6 +332,35 @@ class MultiCandidateSessionData:
         self.created_at = datetime.now()
         self.final_recommendation: Optional[Dict[str, Any]] = None
         self.best_match_candidate_id: Optional[str] = None
+        self._expire_cache = None  # 过期状态缓存
+        self._expire_cache_time = None  # 缓存时间
+
+    def is_expired(self, expire_minutes: int) -> bool:
+        """
+        检查会话是否过期（带缓存）
+
+        Args:
+            expire_minutes: 过期分钟数
+
+        Returns:
+            是否过期
+        """
+        now = datetime.now()
+
+        # 如果缓存存在且未过期（1分钟内），直接使用缓存
+        if (self._expire_cache is not None and
+            self._expire_cache_time is not None and
+            (now - self._expire_cache_time).total_seconds() < 60):
+            return self._expire_cache
+
+        # 重新计算并缓存
+        expire_time = timedelta(minutes=expire_minutes)
+        is_expired = now - self.created_at > expire_time
+
+        self._expire_cache = is_expired
+        self._expire_cache_time = now
+
+        return is_expired
 
     def get_candidate(self, candidate_id: str) -> Optional[CandidateData]:
         """根据ID获取候选人"""

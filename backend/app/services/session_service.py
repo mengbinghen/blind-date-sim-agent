@@ -209,7 +209,7 @@ class SessionService:
 
     def is_session_expired(self, session_id: str) -> bool:
         """
-        检查会话是否过期
+        检查会话是否过期（使用会话对象的缓存方法）
 
         Args:
             session_id: 会话ID
@@ -221,8 +221,8 @@ class SessionService:
         if not session:
             return True
 
-        expire_time = timedelta(minutes=self.config.SESSION_EXPIRE_MINUTES)
-        return datetime.now() - session.created_at > expire_time
+        # 使用会话对象的缓存方法
+        return session.is_expired(self.config.SESSION_EXPIRE_MINUTES)
 
     def delete_session(self, session_id: str) -> bool:
         """

@@ -7,6 +7,7 @@ import re
 import httpx
 from typing import Dict, Any, Optional, List
 from app.config import Config
+from app.utils.normalization import normalize_gender, normalize_gender_in_profile
 from app.prompts.persona_prompts import (
     get_persona_generation_prompt,
     get_chat_system_prompt,
@@ -37,10 +38,11 @@ class AgentService:
         """初始化Agent服务"""
         self.config = Config()
         self.client = None
+        self._client_pool = {}  # 客户端池，按timeout值索引
 
     def _get_client(self, timeout: int = None) -> httpx.AsyncClient:
         """
-        获取HTTP客户端
+        获取HTTP客户端（支持连接池复用）
 
         Args:
             timeout: 超时时间（秒），为None时使用默认值
@@ -48,27 +50,28 @@ class AgentService:
         Returns:
             httpx异步客户端
         """
-        # 如果需要不同的超时时间，创建新的客户端
-        if timeout is not None:
-            return httpx.AsyncClient(
+        # 使用默认超时时间
+        if timeout is None:
+            timeout = self.config.DEEPSEEK_TIMEOUT
+
+        # 从池中获取或创建客户端
+        if timeout not in self._client_pool:
+            self._client_pool[timeout] = httpx.AsyncClient(
                 base_url=self.config.DEEPSEEK_BASE_URL,
-                timeout=timeout
+                timeout=timeout,
+                limits=httpx.Limits(max_keepalive_connections=5, max_connections=10)
             )
 
-        # 使用默认客户端
-        if self.client is None:
-            self.client = httpx.AsyncClient(
-                base_url=self.config.DEEPSEEK_BASE_URL,
-                timeout=self.config.DEEPSEEK_TIMEOUT
-            )
-        return self.client
+        return self._client_pool[timeout]
 
     async def _call_llm(
         self,
         messages: List[Dict[str, str]],
         temperature: float = 0.8,
         model: str = None,
-        timeout: int = None
+        timeout: int = None,
+        max_tokens: int = None,
+        scene: str = "default"
     ) -> str:
         """
         调用大模型API
@@ -78,6 +81,8 @@ class AgentService:
             temperature: 温度参数，控制随机性
             model: 指定使用的模型，默认使用 DEEPSEEK_MODEL
             timeout: 超时时间（秒），为None时使用默认值
+            max_tokens: 最大token数，显式指定时优先使用
+            scene: 场景类型，用于自动选择合适的max_tokens
 
         Returns:
             模型返回的文本内容
@@ -95,11 +100,15 @@ class AgentService:
         # 使用指定模型或默认模型
         model_name = model or self.config.DEEPSEEK_MODEL
 
+        # 确定max_tokens：显式指定 > 场景配置 > 默认值
+        if max_tokens is None:
+            max_tokens = self.config.MAX_TOKENS_MAP.get(scene, 2000)
+
         payload = {
             "model": model_name,
             "messages": messages,
             "temperature": temperature,
-            "max_tokens": 2000
+            "max_tokens": max_tokens
         }
 
         try:
@@ -241,7 +250,7 @@ class AgentService:
         ]
 
         try:
-            response = await self._call_llm(messages, temperature=0.9)
+            response = await self._call_llm(messages, temperature=0.9, scene="persona_generation")
             ai_generated = self._extract_json(response)
 
             # 构建完整人设
@@ -281,11 +290,12 @@ class AgentService:
             user_profile: 用户资料
 
         Returns:
-            默认人设字典
+            默认人设字典（性别已标准化为英文）
         """
         import random
 
-        user_gender = user_profile.get("gender", "male")
+        # 确保用户性别也是标准化的
+        user_gender = normalize_gender(user_profile.get("gender", "male"))
         bot_gender = "female" if user_gender == "male" else "male"
         user_age = user_profile.get("age", 25)
         user_interests = user_profile.get("interests", "").split("、")
@@ -305,7 +315,7 @@ class AgentService:
         else:
             interests = random_interest
 
-        # 构建人设
+        # 构建人设（性别已经是英文）
         return {
             "name": name,
             "age": max(22, min(35, user_age + random.randint(-2, 3))),
@@ -313,7 +323,7 @@ class AgentService:
             "occupation": random.choice(self.config.OCCUPATIONS),
             "interests": interests,
             "personality": random.choice(self.config.PERSONALITIES),
-            "city": user_profile.get("city", "北京"),  # 使用用户所在城市
+            "city": user_profile.get("city", "北京"),
             "backstory": "热爱生活，期待遇到对的人",
             "chat_style": "自然亲切，真诚友善",
             "avatar": "👩" if bot_gender == "female" else "👨"
@@ -360,7 +370,7 @@ class AgentService:
         })
 
         try:
-            response = await self._call_llm(messages, temperature=0.8)
+            response = await self._call_llm(messages, temperature=0.8, scene="chat_response")
             # 清理可能的JSON代码块标记
             response = re.sub(r'```\w*\n?', '', response).strip()
             return response
@@ -412,7 +422,8 @@ class AgentService:
                 messages,
                 temperature=0.7,
                 model=self.config.DEEPSEEK_REASONER_MODEL,
-                timeout=self.config.EVALUATION_TIMEOUT
+                timeout=self.config.EVALUATION_TIMEOUT,
+                scene="evaluation"
             )
             evaluation = self._extract_json(response)
 
@@ -465,11 +476,14 @@ class AgentService:
             "Content-Type": "application/json"
         }
 
+        # 使用场景配置的max_tokens
+        max_tokens = self.config.MAX_TOKENS_MAP.get("evaluation", 2500)
+
         payload = {
             "model": self.config.DEEPSEEK_REASONER_MODEL,
             "messages": messages,
             "temperature": 0.7,
-            "max_tokens": 2000,
+            "max_tokens": max_tokens,
             "stream": True  # 启用流式输出
         }
 
@@ -581,7 +595,7 @@ class AgentService:
                 {"role": "user", "content": prompt}
             ]
 
-            response = await self._call_llm(messages, temperature=0.9)
+            response = await self._call_llm(messages, temperature=0.9, scene="multi_candidate")
             result = self._extract_json(response)
 
             candidates = []
@@ -591,12 +605,8 @@ class AgentService:
                 # AI生成的候选人
                 for i, persona in enumerate(result["candidates"]):
                     print(f"候选人 {i+1} 字段: {list(persona.keys())}")
-                    # 转换性别值：中文转英文
-                    gender_value = persona.get("gender", "female")
-                    if gender_value == "男":
-                        persona["gender"] = "male"
-                    elif gender_value == "女":
-                        persona["gender"] = "female"
+                    # 使用统一函数标准化性别
+                    persona = normalize_gender_in_profile(persona)
 
                     candidates.append({
                         **persona,
@@ -666,7 +676,8 @@ class AgentService:
 
             response = await self._call_llm(
                 messages,
-                temperature=self.config.SIMULATION_TEMPERATURE
+                temperature=self.config.SIMULATION_TEMPERATURE,
+                scene="simulation_round"
             )
 
             result = self._extract_json(response)
@@ -828,7 +839,8 @@ class AgentService:
                 messages,
                 temperature=0.7,
                 model=self.config.DEEPSEEK_REASONER_MODEL,
-                timeout=self.config.EVALUATION_TIMEOUT
+                timeout=self.config.EVALUATION_TIMEOUT,
+                scene="comparative_recommendation"
             )
 
             result = self._extract_json(response)
@@ -885,10 +897,16 @@ class AgentService:
         }
 
     async def close(self):
-        """关闭HTTP客户端"""
+        """关闭所有HTTP客户端"""
+        # 关闭默认客户端（向后兼容）
         if self.client:
             await self.client.aclose()
             self.client = None
+
+        # 关闭池中的所有客户端
+        for timeout, client in self._client_pool.items():
+            await client.aclose()
+        self._client_pool.clear()
 
 
 # 全局Agent服务实例
