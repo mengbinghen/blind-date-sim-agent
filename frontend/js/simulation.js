@@ -11,6 +11,9 @@ let pollingInterval = null;  // 轮询定时器
 let maxRounds = 20;  // 最大对话轮数，从会话数据中获取
 let currentScenarioMode = 'first_chat';
 let currentEventCard = null;
+let sseHealthy = false;  // SSE健康状态
+let sseErrorCount = 0;   // SSE错误计数
+const MAX_SSE_ERRORS = 3;  // 最大允许错误次数
 
 function getCandidateKey(candidate) {
     return candidate?.candidate_id || candidate?.name || '';
@@ -75,8 +78,8 @@ async function initSimulation(sessionId) {
         // 连接SSE流获取模拟进度
         connectSimulationStream(sessionId);
 
-        // 启动轮询备用方案（每2秒检查一次）
-        startPolling(sessionId);
+        // 不再自动启动轮询，等待SSE状态判断
+        // startPolling(sessionId);
 
     } catch (error) {
         console.error('Init simulation error:', error);
@@ -201,12 +204,23 @@ function connectSimulationStream(sessionId) {
     // 监听连接打开
     eventSource.onopen = function() {
         console.log('SSE connection opened');
+        sseHealthy = true;
+        sseErrorCount = 0;  // 重置错误计数
+
+        // SSE连接成功，确保轮询已停止
+        if (pollingInterval) {
+            clearInterval(pollingInterval);
+            pollingInterval = null;
+            console.log('Polling stopped: SSE is healthy');
+        }
     };
 
     eventSource.addEventListener('round', function(e) {
         console.log('SSE round event:', e.data);
         const data = JSON.parse(e.data);
         handleRoundUpdate(data);
+        sseHealthy = true;  // 每次成功接收事件都标记为健康
+        sseErrorCount = 0;
     });
 
     eventSource.addEventListener('complete', function(e) {
@@ -218,7 +232,20 @@ function connectSimulationStream(sessionId) {
     eventSource.addEventListener('error', function(e) {
         console.error('SSE error:', e);
         console.log('EventSource readyState:', eventSource.readyState);
-        eventSource.close();
+
+        sseErrorCount++;
+
+        // 如果SSE连续失败且轮询未启动，启动轮询作为备用
+        if (sseErrorCount >= MAX_SSE_ERRORS && !pollingInterval && !simulationComplete) {
+            console.log('SSE unhealthy, starting polling fallback');
+            sseHealthy = false;
+            startPolling(sessionId);
+        }
+
+        // 如果连接完全断开，关闭连接
+        if (eventSource.readyState === EventSource.CLOSED) {
+            eventSource.close();
+        }
     });
 
     // 保存EventSource引用以便后续关闭
@@ -356,6 +383,14 @@ function updateOverallProgress() {
  * 启动轮询备用方案
  */
 function startPolling(sessionId) {
+    // 如果轮询已在运行，不重复启动
+    if (pollingInterval) {
+        console.log('Polling already running');
+        return;
+    }
+
+    console.log('Starting polling fallback');
+
     // 每2秒轮询一次状态
     pollingInterval = setInterval(async () => {
         try {
@@ -392,6 +427,13 @@ function startPolling(sessionId) {
                 if (status.status === 'completed' && !simulationComplete) {
                     handleSimulationComplete({ all_candidates: status.candidates_status });
                 }
+            }
+
+            // 如果SSE恢复健康，停止轮询
+            if (sseHealthy && pollingInterval) {
+                console.log('SSE recovered, stopping polling');
+                clearInterval(pollingInterval);
+                pollingInterval = null;
             }
         } catch (error) {
             console.error('Polling error:', error);

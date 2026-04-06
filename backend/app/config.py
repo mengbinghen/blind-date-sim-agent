@@ -24,6 +24,17 @@ class Config:
     DEEPSEEK_TIMEOUT = 30  # API调用超时时间（秒）
     EVALUATION_TIMEOUT = 120  # 评价生成超时时间（秒），推理模型需要更长时间
 
+    # ==================== 场景化token配置 ====================
+    MAX_TOKENS_MAP = {
+        "default": 2000,                      # 默认场景
+        "persona_generation": 1500,           # 人设生成
+        "chat_response": 1000,                # 聊天回复
+        "evaluation": 2500,                   # 对话评价
+        "multi_candidate": 3000,              # 批量候选人生成
+        "comparative_recommendation": 3500,   # 比较推荐
+        "simulation_round": 1500              # 模拟对话轮次
+    }
+
     # ==================== 对话配置 ====================
     MAX_ROUNDS = int(os.getenv("MAX_ROUNDS", "20"))  # 最大对话轮次（多候选人模式默认20）
     MAX_MESSAGE_LENGTH = 500  # 单条消息最大长度
